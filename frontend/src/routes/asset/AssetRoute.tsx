@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom"
-import { invoke } from "../../mocks/invoke-stub";
 import { Asset, AssetFile } from "../../types";
 import EditFileDialog from "./EditFileDialog";
 import EditFileForm from "./EditFileForm";
 import { AssetFileListItem } from "./AssetFileListItem";
+import { ListAssetFiles } from "../../../wailsjs/go/assetmanager/AssetManager";
 
 export default function AssetRoute() {
   const { asset } = useLoaderData() as { asset: Asset };
@@ -16,15 +16,9 @@ export default function AssetRoute() {
   useEffect(() => {
     (async () => {
       try {
-        setFiles(await invoke<AssetFile[]>("list_asset_files", {
-          assetUuid: asset.uuid,
-          page: 0
-        }, [{
-          uuid: '12345',
-          name: 'mock',
-          description: 'mock',
-          extension: '.mock'
-        }]) as AssetFile[])
+        const { assetFiles, error } = await ListAssetFiles(asset.uuid, 0)
+        if( error ) throw Error(error);
+        setFiles(assetFiles)
       } catch (e) {
         console.error(e);
         setLoadFileError(true);

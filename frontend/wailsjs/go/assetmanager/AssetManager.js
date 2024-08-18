@@ -14,6 +14,10 @@ export function GetAsset(arg1) {
   return window['go']['assetmanager']['AssetManager']['GetAsset'](arg1);
 }
 
+export function ListAssetFiles(arg1, arg2) {
+  return window['go']['assetmanager']['AssetManager']['ListAssetFiles'](arg1, arg2);
+}
+
 export function ListAssets() {
   return window['go']['assetmanager']['AssetManager']['ListAssets']();
 }

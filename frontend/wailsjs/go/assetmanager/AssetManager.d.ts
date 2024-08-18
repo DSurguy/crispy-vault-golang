@@ -11,6 +11,8 @@ export function CreateAssetFile(arg1:assetmanager.CreateAssetFilePayload):Promis
 
 export function GetAsset(arg1:string):Promise<assetmanager.GetAssetResponse>;
 
+export function ListAssetFiles(arg1:string,arg2:number):Promise<assetmanager.ListAssetFilesResponse>;
+
 export function ListAssets():Promise<assetmanager.ListAssetsResponse>;
 
 export function Provide(arg1:vault.Vault,arg2:dbmanager.DatabaseManager):Promise<void>;

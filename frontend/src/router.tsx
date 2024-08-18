@@ -45,14 +45,18 @@ export const router = createBrowserRouter([
             element: <AssetRoute />,
             loader: async ({ params: { assetUuid }}) => {
               if( !assetUuid ) throw new Error("Unable to load asset, asset ID is undefined");
-              const { asset, error } = await GetAsset(assetUuid);
+              const response = await GetAsset(assetUuid);
+              const { asset, error } = response;
               if (error) throw Error(error);
               return {
                 asset
               }
             },
             handle: {
-              crumb: ({ asset }: { asset: Asset }) => asset ? <Link className="underline" to={`/assets/${asset.uuid}`}>{asset.name}</Link> : null
+              crumb: (data: { asset: Asset }) => {
+                const { asset } = data;
+                return asset ? <Link className="underline" to={`/assets/${asset.uuid}`}>{asset.name}</Link> : null
+              }
             },
             errorElement: <RouteError />
           }

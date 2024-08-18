@@ -123,3 +123,47 @@ func copyFile(sourcePath string, destPath string) error {
 	_, err = io.Copy(dest, source)
 	return err
 }
+
+type ListAssetFilesResponse struct {
+	AssetFiles []AssetFile `json:"assetFiles"`
+	Err        string      `json:"error"`
+}
+
+func (man *AssetManager) ListAssetFiles(assetUuid string, offset int) ListAssetFilesResponse {
+	query := "SELECT uuid, name, description, extension " +
+		"FROM asset_file " +
+		"INNER JOIN asset_to_asset_file aaf ON asset_file.uuid = aaf.asset_file_id AND aaf.asset_id = ?" +
+		"ORDER BY last_update DESC " +
+		"LIMIT 20 OFFSET ?"
+	rows, err := man.dbman.DB.Query(query, assetUuid, offset)
+	if err != nil {
+		return ListAssetFilesResponse{
+			Err: err.Error(),
+		}
+	}
+
+	files := make([]AssetFile, 0)
+	for rows.Next() {
+		var (
+			uuid        string
+			name        string
+			description string
+			extension   string
+		)
+		err = rows.Scan(&uuid, &name, &description, &extension)
+		if err != nil {
+			return ListAssetFilesResponse{
+				Err: err.Error(),
+			}
+		}
+		files = append(files, AssetFile{
+			Uuid:        uuid,
+			Name:        name,
+			Description: description,
+			Extension:   extension,
+		})
+	}
+	return ListAssetFilesResponse{
+		AssetFiles: files,
+	}
+}
