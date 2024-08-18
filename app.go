@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -36,4 +37,35 @@ func (a *App) Confirm(title string, message string) bool {
 		return false
 	}
 	return text == "Yes"
+}
+
+type SelectFileResponse struct {
+	Path string `json:"path"`
+	Err  string `json:"error"`
+}
+
+func (a *App) SelectFile() SelectFileResponse {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return SelectFileResponse{
+			Err: err.Error(),
+		}
+	}
+	selectedPath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		DefaultDirectory:           homeDir,
+		Title:                      "Upload File",
+		ShowHiddenFiles:            false,
+		CanCreateDirectories:       false,
+		ResolvesAliases:            true,
+		TreatPackagesAsDirectories: false,
+	})
+
+	if err != nil {
+		return SelectFileResponse{
+			Err: err.Error(),
+		}
+	}
+	return SelectFileResponse{
+		Path: selectedPath,
+	}
 }

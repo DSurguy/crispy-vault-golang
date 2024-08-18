@@ -5,3 +5,7 @@
 export function Confirm(arg1, arg2) {
   return window['go']['main']['App']['Confirm'](arg1, arg2);
 }
+
+export function SelectFile() {
+  return window['go']['main']['App']['SelectFile']();
+}

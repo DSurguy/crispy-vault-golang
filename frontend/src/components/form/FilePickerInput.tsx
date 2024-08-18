@@ -1,9 +1,5 @@
 import { twMerge } from "tailwind-merge";
-
-async function open (input: { multiple: boolean }): Promise<{ path: string } | null> {
-  console.log("OPEN", input);
-  return null;
-}
+import { SelectFile } from "../../../wailsjs/go/main/App";
 
 type FilePickerInputProps = {
   className?: string;
@@ -21,12 +17,11 @@ export default function FilePickerInput({ className, onChange, value }: FilePick
 
   const handleChooseClick = async () => {
     try {
-      const selected = await open({
-        multiple: false,
-      });
+      const { path, error } = await SelectFile();
+      if (error) throw Error(error)
 
-      if ( selected ) {
-        onChange(selected.path);
+      if ( path ) {
+        onChange(path);
       } else {
         onChange(null);
       }

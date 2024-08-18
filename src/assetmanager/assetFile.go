@@ -32,8 +32,15 @@ type CreateAssetFileResponse struct {
 func (man *AssetManager) CreateAssetFile(payload CreateAssetFilePayload) CreateAssetFileResponse {
 	uuid := uuid.New().String()
 	extension := filepath.Ext(payload.Path)
-	destPath := filepath.Join(man.vault.BaseDir, "assets", payload.AssetUuid, fmt.Sprintf("%s.%s", uuid, extension))
-	err := copyFile(payload.Path, destPath)
+	assetPath := filepath.Join(man.vault.BaseDir, "assets", payload.AssetUuid)
+	err := os.MkdirAll(assetPath, 0755)
+	if err != nil {
+		return CreateAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+	destPath := filepath.Join(assetPath, fmt.Sprintf("%s.%s", uuid, extension))
+	err = copyFile(payload.Path, destPath)
 	if err != nil {
 		return CreateAssetFileResponse{
 			Err: err.Error(),
