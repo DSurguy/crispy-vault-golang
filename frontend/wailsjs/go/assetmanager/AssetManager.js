@@ -10,6 +10,10 @@ export function CreateAssetFile(arg1) {
   return window['go']['assetmanager']['AssetManager']['CreateAssetFile'](arg1);
 }
 
+export function EditAssetFile(arg1) {
+  return window['go']['assetmanager']['AssetManager']['EditAssetFile'](arg1);
+}
+
 export function GetAsset(arg1) {
   return window['go']['assetmanager']['AssetManager']['GetAsset'](arg1);
 }

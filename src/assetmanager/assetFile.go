@@ -9,6 +9,35 @@ import (
 	"github.com/google/uuid"
 )
 
+func copyFile(sourcePath string, destPath string) error {
+	sourceFileStat, err := os.Stat(sourcePath)
+	if err != nil {
+		return err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a regular file", sourcePath)
+	}
+
+	source, err := os.Open(sourcePath)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	dest, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	err = dest.Chmod(0755)
+	if err != nil {
+		return err
+	}
+	defer dest.Close()
+	_, err = io.Copy(dest, source)
+	return err
+}
+
 type AssetFile struct {
 	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`
@@ -95,35 +124,6 @@ func (man *AssetManager) CreateAssetFile(payload CreateAssetFilePayload) CreateA
 	}
 }
 
-func copyFile(sourcePath string, destPath string) error {
-	sourceFileStat, err := os.Stat(sourcePath)
-	if err != nil {
-		return err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return fmt.Errorf("%s is not a regular file", sourcePath)
-	}
-
-	source, err := os.Open(sourcePath)
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	dest, err := os.Create(destPath)
-	if err != nil {
-		return err
-	}
-	err = dest.Chmod(0755)
-	if err != nil {
-		return err
-	}
-	defer dest.Close()
-	_, err = io.Copy(dest, source)
-	return err
-}
-
 type ListAssetFilesResponse struct {
 	AssetFiles []AssetFile `json:"assetFiles"`
 	Err        string      `json:"error"`
@@ -166,4 +166,118 @@ func (man *AssetManager) ListAssetFiles(assetUuid string, offset int) ListAssetF
 	return ListAssetFilesResponse{
 		AssetFiles: files,
 	}
+}
+
+type EditAssetFilePayload struct {
+	AssetUuid   string `json:"assetUuid"`
+	FileUuid    string `json:"fileUuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Path        string `json:"path"`
+}
+
+type EditAssetFileResponse struct {
+	AssetFile AssetFile `json:"assetFile"`
+	Err       string    `json:"error"`
+}
+
+func (man *AssetManager) EditAssetFile(payload EditAssetFilePayload) EditAssetFileResponse {
+	// TODO: validate that the file belongs to this asset
+	var err error
+	if payload.Path != "" {
+		err = man.editAndReplaceFile(payload)
+	} else {
+		err = man.editFile(payload)
+	}
+	if err != nil {
+		return EditAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+
+	file, err := man.getAssetFileFromDb(payload.FileUuid)
+	if err != nil {
+		return EditAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+
+	return EditAssetFileResponse{
+		AssetFile: AssetFile{
+			Uuid:        file.Uuid,
+			Name:        file.Name,
+			Description: file.Description,
+			Extension:   file.Extension,
+		},
+	}
+}
+
+func (man *AssetManager) editFile(payload EditAssetFilePayload) error {
+	query := "UPDATE asset_file SET " +
+		"name = ?, " +
+		"description = ?, " +
+		"last_update = datetime('now') " +
+		"WHERE uuid = ?"
+	_, err := man.dbman.DB.Exec(query, payload.Name, payload.Description, payload.FileUuid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (man *AssetManager) editAndReplaceFile(payload EditAssetFilePayload) error {
+	assetPath := filepath.Join(man.vault.BaseDir, "assets", payload.AssetUuid)
+
+	// Remove the existing file first
+	currentFile, err := man.getAssetFileFromDb(payload.FileUuid)
+	if err != nil {
+		return err
+	}
+	existingPath := filepath.Join(assetPath, fmt.Sprintf("%s.%s", payload.FileUuid, currentFile.Extension))
+	err = os.RemoveAll(existingPath)
+	if err != nil {
+		return err
+	}
+
+	// Then copy the new file
+	extension := filepath.Ext(payload.Path)
+	destPath := filepath.Join(assetPath, fmt.Sprintf("%s.%s", payload.FileUuid, extension))
+	err = copyFile(payload.Path, destPath)
+	if err != nil {
+		return err
+	}
+
+	// last update the database
+	query := "UPDATE asset_file SET " +
+		"name = ?, " +
+		"description = ?, " +
+		"extension = ?, " +
+		"last_update = datetime('now') " +
+		"WHERE uuid = ?"
+	_, err = man.dbman.DB.Exec(query, payload.Name, payload.Description, extension, payload.FileUuid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (man *AssetManager) getAssetFileFromDb(fileUuid string) (*AssetFile, error) {
+	row := man.dbman.DB.QueryRow("SELECT uuid, name, description, extension FROM asset_file WHERE uuid = ?", fileUuid)
+	var (
+		uuid        string
+		name        string
+		description string
+		extension   string
+	)
+	err := row.Scan(&uuid, &name, &description, &extension)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AssetFile{
+		Uuid:        uuid,
+		Name:        name,
+		Description: description,
+		Extension:   extension,
+	}, nil
 }
