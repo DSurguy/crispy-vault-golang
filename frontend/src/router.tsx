@@ -1,6 +1,5 @@
 import { createBrowserRouter, Link, Outlet, redirect } from 'react-router-dom';
 import { TbHome } from "react-icons/tb";
-import HomeRoute from './routes/home/HomeRoute';
 import AddAssetRoute from './routes/add-asset/AddAssetRoute';
 import RootRoute from './routes/root/RootRoute';
 import ListAssetsRoute from './routes/list-assets/ListAssetsRoute';
@@ -20,7 +19,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '',
-        element: <HomeRoute />,
+        element: null,
         loader: async () => {
           return redirect("/assets");
         }
