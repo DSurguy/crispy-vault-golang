@@ -9,6 +9,8 @@ export function CreateAsset(arg1:string):Promise<assetmanager.CreateAssetRespons
 
 export function CreateAssetFile(arg1:assetmanager.CreateAssetFilePayload):Promise<assetmanager.CreateAssetFileResponse>;
 
+export function DeleteAssetFile(arg1:assetmanager.DeleteAssetFilePayload):Promise<assetmanager.DeleteAssetFileResponse>;
+
 export function EditAssetFile(arg1:assetmanager.EditAssetFilePayload):Promise<assetmanager.EditAssetFileResponse>;
 
 export function GetAsset(arg1:string):Promise<assetmanager.GetAssetResponse>;

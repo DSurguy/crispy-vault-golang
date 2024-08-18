@@ -98,6 +98,32 @@ export namespace assetmanager {
 	        this.error = source["error"];
 	    }
 	}
+	export class DeleteAssetFilePayload {
+	    assetUuid: string;
+	    fileUuid: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteAssetFilePayload(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.assetUuid = source["assetUuid"];
+	        this.fileUuid = source["fileUuid"];
+	    }
+	}
+	export class DeleteAssetFileResponse {
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteAssetFileResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	    }
+	}
 	export class EditAssetFilePayload {
 	    assetUuid: string;
 	    fileUuid: string;

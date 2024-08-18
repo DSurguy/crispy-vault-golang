@@ -5,7 +5,7 @@ import FilePickerInput from "../../components/form/FilePickerInput";
 import TextareaInput from "../../components/form/TextareaInput";
 import { AssetFile } from "../../types";
 import { Confirm } from '../../../wailsjs/go/main/App';
-import { CreateAssetFile, EditAssetFile } from "../../../wailsjs/go/assetmanager/AssetManager";
+import { CreateAssetFile, DeleteAssetFile, EditAssetFile } from "../../../wailsjs/go/assetmanager/AssetManager";
 
 type EditFileFormProps = {
   assetUuid: string;
@@ -73,10 +73,11 @@ export default function EditFileForm({ assetUuid, file, onComplete, onDelete }: 
       ) === false) {
         return;
       }
-      await invoke<undefined>("delete_asset_file", {
+      const { error } = await DeleteAssetFile({
         assetUuid,
         fileUuid: file.uuid
-      }, undefined)
+      })
+      if( error ) throw Error(error)
       onDelete(file.uuid)
     } catch (e) {
       console.error(e);

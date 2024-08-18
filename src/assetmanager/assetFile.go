@@ -281,3 +281,41 @@ func (man *AssetManager) getAssetFileFromDb(fileUuid string) (*AssetFile, error)
 		Extension:   extension,
 	}, nil
 }
+
+type DeleteAssetFilePayload struct {
+	AssetUuid string `json:"assetUuid"`
+	FileUuid  string `json:"fileUuid"`
+}
+
+type DeleteAssetFileResponse struct {
+	Err string `json:"error"`
+}
+
+func (man *AssetManager) DeleteAssetFile(payload DeleteAssetFilePayload) DeleteAssetFileResponse {
+	currentFile, err := man.getAssetFileFromDb(payload.FileUuid)
+	if err != nil {
+		return DeleteAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+
+	// Remove from DB
+	_, err = man.dbman.DB.ExecContext(man.ctx, "DELETE FROM asset_file WHERE uuid = ?", payload.FileUuid)
+	if err != nil {
+		return DeleteAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+
+	// Remove from file system
+	assetPath := filepath.Join(man.vault.BaseDir, "assets", payload.AssetUuid)
+	existingPath := filepath.Join(assetPath, fmt.Sprintf("%s.%s", payload.FileUuid, currentFile.Extension))
+	err = os.RemoveAll(existingPath)
+	if err != nil {
+		return DeleteAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+
+	return DeleteAssetFileResponse{}
+}
