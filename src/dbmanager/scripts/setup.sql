@@ -55,14 +55,14 @@ CREATE TABLE IF NOT EXISTS asset_file (
 
 -- name: create-tag-asset-assoc-table
 CREATE TABLE IF NOT EXISTS tag_to_asset (
-    asset_id INTEGER,
-    tag_id INTEGER,
+    asset_id TEXT,
+    tag_id TEXT,
     PRIMARY KEY (asset_id, tag_id) ON CONFLICT ROLLBACK
 );
 
 -- name: create-asset-file-assoc-table
 CREATE TABLE IF NOT EXISTS asset_to_asset_file (
-    asset_id INTEGER,
-    asset_file_id INTEGER,
+    asset_id TEXT,
+    asset_file_id TEXT,
     PRIMARY KEY (asset_id, asset_file_id) ON CONFLICT ROLLBACK
 );

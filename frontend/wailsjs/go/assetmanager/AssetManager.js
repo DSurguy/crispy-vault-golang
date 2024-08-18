@@ -6,6 +6,14 @@ export function CreateAsset(arg1) {
   return window['go']['assetmanager']['AssetManager']['CreateAsset'](arg1);
 }
 
+export function CreateAssetFile(arg1) {
+  return window['go']['assetmanager']['AssetManager']['CreateAssetFile'](arg1);
+}
+
+export function GetAsset(arg1) {
+  return window['go']['assetmanager']['AssetManager']['GetAsset'](arg1);
+}
+
 export function ListAssets() {
   return window['go']['assetmanager']['AssetManager']['ListAssets']();
 }

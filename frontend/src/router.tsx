@@ -1,4 +1,3 @@
-import { invoke } from './mocks/invoke-stub';
 import { createBrowserRouter, Link, Outlet, redirect } from 'react-router-dom';
 import { TbHome } from "react-icons/tb";
 import HomeRoute from './routes/home/HomeRoute';
@@ -8,6 +7,7 @@ import ListAssetsRoute from './routes/list-assets/ListAssetsRoute';
 import AssetRoute from './routes/asset/AssetRoute';
 import RouteError from './components/RouteError';
 import { Asset } from './types';
+import { GetAsset } from '../wailsjs/go/assetmanager/AssetManager'
 
 export const router = createBrowserRouter([
   {
@@ -45,12 +45,8 @@ export const router = createBrowserRouter([
             element: <AssetRoute />,
             loader: async ({ params: { assetUuid }}) => {
               if( !assetUuid ) throw new Error("Unable to load asset, asset ID is undefined");
-              const asset = await invoke<Asset>('get_asset', {
-                uuid: assetUuid
-              }, {
-                uuid: assetUuid,
-                name: 'Test Asset'
-              });
+              const { asset, error } = await GetAsset(assetUuid);
+              if (error) throw Error(error);
               return {
                 asset
               }

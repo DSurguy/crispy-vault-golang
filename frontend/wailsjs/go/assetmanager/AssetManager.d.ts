@@ -7,6 +7,10 @@ import {context} from '../models';
 
 export function CreateAsset(arg1:string):Promise<assetmanager.CreateAssetResponse>;
 
+export function CreateAssetFile(arg1:assetmanager.CreateAssetFilePayload):Promise<assetmanager.CreateAssetFileResponse>;
+
+export function GetAsset(arg1:string):Promise<assetmanager.GetAssetResponse>;
+
 export function ListAssets():Promise<assetmanager.ListAssetsResponse>;
 
 export function Provide(arg1:vault.Vault,arg2:dbmanager.DatabaseManager):Promise<void>;

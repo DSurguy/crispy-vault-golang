@@ -1,34 +1,11 @@
 package assetmanager
 
-import (
-	"crispy-vault/src/dbmanager"
-	"crispy-vault/src/vault"
-	"database/sql"
-	"log"
-
-	"context"
-
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
 type Asset struct {
 	Uuid       string `json:"uuid"`
 	Name       string `json:"name"`
 	LastUpdate string `json:"lastUpdate"`
-}
-
-type AssetManager struct {
-	ctx   context.Context
-	vault *vault.Vault
-	dbman *dbmanager.DatabaseManager
-}
-
-func (man *AssetManager) SetContext(ctx context.Context) {
-	man.ctx = ctx
-}
-func (man *AssetManager) Provide(vault *vault.Vault, dbman *dbmanager.DatabaseManager) {
-	man.vault = vault
-	man.dbman = dbman
 }
 
 type CreateAssetResponse struct {
@@ -92,8 +69,27 @@ func (man *AssetManager) ListAssets() ListAssetsResponse {
 	}
 }
 
-func dieIfErr(res sql.Result, err error) {
-	if err != nil {
-		log.Fatal(err)
+type GetAssetResponse struct {
+	Asset Asset  `json:"asset"`
+	Err   string `json:"error"`
+}
+
+func (man *AssetManager) GetAsset(uuid string) GetAssetResponse {
+	row := man.dbman.DB.QueryRow("SELECT name, uuid, last_update FROM asset WHERE uuid = ?1", uuid)
+	var name string
+	var rowUuid string
+	var lastUpdate string
+	if err := row.Scan(&name, &rowUuid, &lastUpdate); err != nil {
+		return GetAssetResponse{
+			Err: err.Error(),
+		}
+	}
+	asset := Asset{
+		Name:       name,
+		Uuid:       uuid,
+		LastUpdate: lastUpdate,
+	}
+	return GetAssetResponse{
+		Asset: asset,
 	}
 }
