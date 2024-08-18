@@ -1,8 +1,8 @@
-import { invoke } from "../../mocks/invoke-stub";
 import { useDebounce } from "@uidotdev/usehooks";
 import fuzzysort from "fuzzysort";
 import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { TagSearch } from '../../../wailsjs/go/tagmanager/TagManager';
 
 const mockTags = [
   "test",
@@ -85,14 +85,13 @@ export default function OmniSearch({ className }: OmniSearchProps) {
 
         if (/^(t|tag):(.+){3}/.test(debouncedInput)) {
           try {
-            const results = await invoke<string[]>('tag_search', {
+            const { tags: searchResult, error } = await TagSearch({
               search: debouncedInput.split(/:/g)[1],
-              existingTags: tags,
-            }, mockTags);
+              omit: tags
+            })
+            if( error ) throw Error(error);
             setTagSearchResults(
-              results.filter(tag => {
-                return !tags.includes(tag);
-              }).map(tag => ({
+              searchResult.map(tag => ({
                 text: tag,
                 selected: false
               }))

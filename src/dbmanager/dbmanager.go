@@ -2,20 +2,20 @@ package dbmanager
 
 import (
 	"crispy-vault/src/vault"
-	"database/sql"
 	"path/filepath"
 
 	"context"
 	_ "embed"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type DatabaseManager struct {
 	ctx   context.Context
 	vault *vault.Vault
-	DB    *sql.DB
+	DB    *sqlx.DB
 }
 
 func (man *DatabaseManager) SetContext(ctx context.Context) {
@@ -28,7 +28,7 @@ func (man *DatabaseManager) Provide(vault *vault.Vault) {
 func (man *DatabaseManager) Bootstrap() {
 	log.Print(man.vault.BaseDir)
 	dbPath := filepath.Join(man.vault.BaseDir, "db.sql")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sqlx.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,19 +46,19 @@ var setupScript string
 var seedScript string
 
 func (man *DatabaseManager) setupDb() {
-	dieIfErr(man.DB.Exec(setupScript))
+	_, err := man.DB.Exec(setupScript)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Print("Database setup successfully")
 }
 
 func (man *DatabaseManager) seedDb() {
-	dieIfErr(man.DB.Exec(seedScript))
-
-	log.Print("Database seeded")
-}
-
-func dieIfErr(res sql.Result, err error) {
+	_, err := man.DB.Exec(seedScript)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Print("Database seeded")
 }

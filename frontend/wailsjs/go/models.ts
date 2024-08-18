@@ -311,6 +311,39 @@ export namespace main {
 
 }
 
+export namespace tagmanager {
+	
+	export class TagSearchPayload {
+	    search: string;
+	    omit: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new TagSearchPayload(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.search = source["search"];
+	        this.omit = source["omit"];
+	    }
+	}
+	export class TagSearchResponse {
+	    tags: string[];
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TagSearchResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.tags = source["tags"];
+	        this.error = source["error"];
+	    }
+	}
+
+}
+
 export namespace vault {
 	
 	export class Vault {

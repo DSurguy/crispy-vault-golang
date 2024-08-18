@@ -291,6 +291,7 @@ type DeleteAssetFileResponse struct {
 	Err string `json:"error"`
 }
 
+// TODO: cascade
 func (man *AssetManager) DeleteAssetFile(payload DeleteAssetFilePayload) DeleteAssetFileResponse {
 	currentFile, err := man.getAssetFileFromDb(payload.FileUuid)
 	if err != nil {

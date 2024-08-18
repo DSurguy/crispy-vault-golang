@@ -6,6 +6,7 @@ import (
 
 	"crispy-vault/src/assetmanager"
 	"crispy-vault/src/dbmanager"
+	"crispy-vault/src/tagmanager"
 	"crispy-vault/src/vault"
 
 	"github.com/wailsapp/wails/v2"
@@ -26,6 +27,8 @@ func main() {
 	db.Bootstrap()
 	assetManager := assetmanager.AssetManager{}
 	assetManager.Provide(&vault, &db)
+	tagManager := tagmanager.TagManager{}
+	tagManager.Provide(&db)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -45,6 +48,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 			&assetManager,
+			&tagManager,
 		},
 	})
 
