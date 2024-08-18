@@ -28,7 +28,6 @@ type CreateAssetFileResponse struct {
 	Err       string    `json:"error"`
 }
 
-// TODO: transaction
 func (man *AssetManager) CreateAssetFile(payload CreateAssetFilePayload) CreateAssetFileResponse {
 	uuid := uuid.New().String()
 	extension := filepath.Ext(payload.Path)
@@ -46,7 +45,14 @@ func (man *AssetManager) CreateAssetFile(payload CreateAssetFilePayload) CreateA
 			Err: err.Error(),
 		}
 	}
-	_, err = man.dbman.DB.ExecContext(
+
+	tx, err := man.dbman.DB.BeginTx(man.ctx, nil)
+	if err != nil {
+		return CreateAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+	_, err = tx.ExecContext(
 		man.ctx,
 		"INSERT INTO asset_file (uuid, name, description, extension, last_update) VALUES (?, ?, ?, ?, datetime('now'))",
 		uuid,
@@ -55,18 +61,26 @@ func (man *AssetManager) CreateAssetFile(payload CreateAssetFilePayload) CreateA
 		extension,
 	)
 	if err != nil {
+		_ = tx.Rollback()
 		return CreateAssetFileResponse{
 			Err: err.Error(),
 		}
 	}
 
-	_, err = man.dbman.DB.ExecContext(
+	_, err = tx.ExecContext(
 		man.ctx,
 		"INSERT INTO asset_to_asset_file (asset_id, asset_file_id) VALUES (?, ?)",
 		payload.AssetUuid,
 		uuid,
 	)
 	if err != nil {
+		_ = tx.Rollback()
+		return CreateAssetFileResponse{
+			Err: err.Error(),
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		_ = tx.Rollback()
 		return CreateAssetFileResponse{
 			Err: err.Error(),
 		}
