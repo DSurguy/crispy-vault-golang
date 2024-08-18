@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { invoke } from "../../mocks/invoke-stub";
+import { ListAssets } from '../../../wailsjs/go/assetmanager/AssetManager'
 import { Asset } from "../../types";
 
 export default function ListAssetsRoute() {
-  const [assets, setAssets] = useState<{ uuid: string, name: string }[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        setAssets(await invoke<Asset[]>("list_assets", undefined, [{ uuid: '12345', name: 'mock' }]))
+        const { assets, error } = await ListAssets();
+        if( error ) throw Error(error);
+        setAssets(assets)
         setError(null);
       } catch (e) {
         console.error(e);

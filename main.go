@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 
+	"crispy-vault/src/assetmanager"
 	"crispy-vault/src/dbmanager"
 	"crispy-vault/src/vault"
 
@@ -20,8 +21,11 @@ func main() {
 	app := NewApp()
 	vault := vault.Vault{}
 	vault.Bootstrap()
-	db := dbmanager.DatabaseManager{Vault: &vault}
+	db := dbmanager.DatabaseManager{}
+	db.Provide(&vault)
 	db.Bootstrap()
+	assetManager := assetmanager.AssetManager{}
+	assetManager.Provide(&vault, &db)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -36,9 +40,11 @@ func main() {
 			app.startup(ctx)
 			db.SetContext(ctx)
 			vault.SetContext(ctx)
+			assetManager.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			app,
+			&assetManager,
 		},
 	})
 

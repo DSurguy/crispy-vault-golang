@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
-import { invoke } from "../../mocks/invoke-stub"
 import { useForm } from "@tanstack/react-form"
+import { CreateAsset } from '../../../wailsjs/go/assetmanager/AssetManager'
 import TextInput from "../../components/form/TextInput"
 
 export default function AddAssetRoute() {
@@ -11,9 +11,7 @@ export default function AddAssetRoute() {
       file: '',
     },
     onSubmit: async ({ value: { name } }) => {
-      const uuid = await invoke<string>("create_asset", {
-        name
-      }, '12345') as string;
+      const uuid = await CreateAsset(name);
       navigate({
         pathname: `/assets/${uuid}`
       })

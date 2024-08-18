@@ -7,7 +7,7 @@ type AppBarProps = {
   basis: string;
 }
 
-const defaultClassName = "flex items-center"
+const defaultClassName = "flex items-center bg-gray-200"
 const defaultIconWrapperClassName = "flex h-full justify-center items-center p-1"
 
 export default function AppBar({ className, basis = "basis-12" }: AppBarProps) {

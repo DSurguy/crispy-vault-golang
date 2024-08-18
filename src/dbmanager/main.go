@@ -14,17 +14,20 @@ import (
 
 type DatabaseManager struct {
 	ctx   context.Context
-	Vault *vault.Vault
+	vault *vault.Vault
 	DB    *sql.DB
 }
 
 func (man *DatabaseManager) SetContext(ctx context.Context) {
 	man.ctx = ctx
 }
+func (man *DatabaseManager) Provide(vault *vault.Vault) {
+	man.vault = vault
+}
 
 func (man *DatabaseManager) Bootstrap() {
-	log.Print(man.Vault.BaseDir)
-	dbPath := filepath.Join(man.Vault.BaseDir, "db.sql")
+	log.Print(man.vault.BaseDir)
+	dbPath := filepath.Join(man.vault.BaseDir, "db.sql")
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
