@@ -278,7 +278,7 @@ export namespace assetmanager {
 export namespace dbmanager {
 	
 	export class DatabaseManager {
-	
+	    DB?: sqlx.DB;
 	
 	    static createFrom(source: any = {}) {
 	        return new DatabaseManager(source);
@@ -286,8 +286,26 @@ export namespace dbmanager {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	
+	        this.DB = this.convertValues(source["DB"], sqlx.DB);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }
@@ -307,6 +325,42 @@ export namespace main {
 	        this.path = source["path"];
 	        this.error = source["error"];
 	    }
+	}
+
+}
+
+export namespace sqlx {
+	
+	export class DB {
+	    // Go type: reflectx
+	    Mapper?: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new DB(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Mapper = this.convertValues(source["Mapper"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }
@@ -347,7 +401,7 @@ export namespace tagmanager {
 export namespace vault {
 	
 	export class Vault {
-	
+	    BaseDir: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Vault(source);
@@ -355,7 +409,7 @@ export namespace vault {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	
+	        this.BaseDir = source["BaseDir"];
 	    }
 	}
 
